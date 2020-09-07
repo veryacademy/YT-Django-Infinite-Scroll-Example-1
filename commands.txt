@@ -1,0 +1,39 @@
+####
+Shell commands
+####
+
+py manage.py shell
+from cbv.models import Post
+p = Post(name='name1')
+p.save()exit()
+
+from django.contrib.auth.views import redirect_to_login
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import redirect
+
+
+class LoggedInPermissionsMixin(PermissionRequiredMixin):
+    def dispatch(self, request, *args, **kwargs):
+        if (not self.request.user.is_authenticated):
+            return redirect_to_login(self.request.get_full_path(),
+                                     self.get_login_url(), self.get_redirect_field_name())
+        if not self.has_permission():
+            return redirect('/books')
+        return super(LoggedInPermissionsMixin, self).dispatch(request, *args, **kwargs)
+
+
+class BookEditView(LoggedInPermissionsMixin, UpdateView):
+
+    permission_denied_message = 'asdasda'
+    # raise_exception = False
+    # redirect_field_name = 'next'
+    # redirect_unauthenticated_users = True
+    permission_denied_message = "aad"
+    login_url = '/books/'
+
+    permission_required = 'books.change_books'
+
+    model = Books
+    form_class = AddForm
+    template_name = 'add.html'
+    success_url = '/books/'
